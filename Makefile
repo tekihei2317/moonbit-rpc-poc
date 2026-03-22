@@ -1,4 +1,4 @@
-.PHONY: frontend-dev backend-dev build-backend clean
+.PHONY: frontend-dev backend-dev build-backend test-api clean
 
 PORT ?= 4000
 
@@ -10,6 +10,9 @@ backend-dev:
 
 build-backend:
 	moon build backend --target native
+
+test-api:
+	PORT=$(PORT) bash backend/api_test/run.sh
 
 clean:
 	rm -f contacts.db

@@ -5,3 +5,5 @@ pre-commit:
     - name: moon fmt
       run: moon fmt
       stage_fixed: true
+    - name: hurlfmt
+      run: hurlfmt backend/api_test/*.hurl

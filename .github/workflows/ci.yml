@@ -12,10 +12,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
       - name: Set up MoonBit
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s nightly
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Install web dependencies
+        run: bun install
 
       - name: Moon update
         run: moon update
@@ -26,5 +32,11 @@ jobs:
       - name: Check all targets
         run: moon check --target all
 
+      - name: Run backend tests
+        run: moon test backend --target native
+
       - name: Run frontend tests
         run: moon test frontend/app --target js
+
+      - name: Run backend API tests
+        run: make test-api

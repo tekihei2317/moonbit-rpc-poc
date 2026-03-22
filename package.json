@@ -7,8 +7,12 @@
     "prepare": "lefthook install"
   },
   "devDependencies": {
+    "@orangeopensource/hurl": "^7.1.7",
     "lefthook": "^1.11.13",
     "vite": "^7.3.1",
     "vite-plugin-moonbit": "^0.1.5"
-  }
+  },
+  "trustedDependencies": [
+    "@orangeopensource/hurl"
+  ]
 }

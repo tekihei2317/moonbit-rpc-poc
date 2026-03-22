@@ -1,9 +1,12 @@
 {
   "name": "tekihei2317/moonbit-rpc-poc",
   "deps": {
-    "moonbit-community/rabbita": "0.11.5",
-    "oboard/mocket": "0.6.11",
+    "mizchi/mars": "0.3.10",
     "myfreess/sqlite3": "0.1.1",
+    "oboard/mocket": "0.6.11",
+    "moonbit-community/rabbita": "0.11.5",
+    "moonbit-community/sqlite3": "0.1.3",
+    "moonbitlang/async": "0.16.6",
     "moonbitlang/x": "0.4.40"
   }
 }

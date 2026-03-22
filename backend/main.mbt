@@ -5,7 +5,7 @@ fn main raise {
   guard @argparse.parse(
       Command("contacts", about="Contact Manager backend", options=[
         OptionArg("port", short='p', long="port", about="Port to listen on", default_values=[
-          "4004",
+          "4000",
         ]),
       ]),
     )
@@ -70,7 +70,9 @@ fn main raise {
     try {
       let contacts = get_all_contacts(conn)
       println("  -> 200 (\{contacts.length()} contacts)")
-      @mocket.HttpResponse::new(OK).json(contacts)
+      @mocket.HttpResponse::new(OK, headers={
+        "Content-Type": "application/json; charset=utf-8",
+      }).json(contacts)
     } catch {
       e => {
         println("  -> 500 \{e}")
@@ -129,7 +131,9 @@ fn main raise {
       }
       let contact = create_contact(conn, name, email, phone)
       println("  -> 201 created contact: \{name}")
-      @mocket.HttpResponse::new(Created).json(contact)
+      @mocket.HttpResponse::new(Created, headers={
+        "Content-Type": "application/json; charset=utf-8",
+      }).json(contact)
     } catch {
       e => {
         println("  -> 500 \{e}")
@@ -144,7 +148,9 @@ fn main raise {
       let id = @strconv.parse_int(id_str)
       let contact = toggle_favorite(conn, id)
       println("  -> 200 toggled favorite for contact \{id}")
-      @mocket.HttpResponse::new(OK).json(contact)
+      @mocket.HttpResponse::new(OK, headers={
+        "Content-Type": "application/json; charset=utf-8",
+      }).json(contact)
     } catch {
       e => {
         println("  -> 500 \{e}")
