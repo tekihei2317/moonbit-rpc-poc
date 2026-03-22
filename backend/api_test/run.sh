@@ -6,6 +6,10 @@ PORT="${PORT:-4001}"
 HOST="${HOST:-http://127.0.0.1:${PORT}}"
 SERVER_PID=""
 
+stop_existing_server() {
+  pkill -f "moon run backend --target native -- --port $PORT" 2>/dev/null || true
+}
+
 stop_server() {
   if [ -n "$SERVER_PID" ]; then
     kill "$SERVER_PID" 2>/dev/null || true
@@ -27,7 +31,7 @@ run_test_file() {
   done
 
   local exit_code=0
-  hurl --test --jobs 1 --variable "host=$HOST" "$file" || exit_code=$?
+  bunx hurl --test --http1.0 --jobs 1 -H "Connection: close" --variable "host=$HOST" "$file" || exit_code=$?
   stop_server
   return "$exit_code"
 }
@@ -35,6 +39,8 @@ run_test_file() {
 trap stop_server EXIT
 
 echo "Running Hurl tests against $HOST"
+
+stop_existing_server
 
 if [ $# -eq 0 ]; then
   for file in backend/api_test/*.hurl; do
