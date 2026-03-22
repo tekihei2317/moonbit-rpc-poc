@@ -1,0 +1,12 @@
+{
+  "name": "@moonbit-rpc-poc/web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "vite-plugin-moonbit": "^0.1.5"
+  }
+}

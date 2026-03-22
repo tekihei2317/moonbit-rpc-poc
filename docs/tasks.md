@@ -10,6 +10,10 @@
 
 ## In-Progress
 
+- 環境構築をする
+  - フロントエンドは`rabitta`、`vite-plugin-moonbit`を使う
+  - サーバーサイドは`mars`を使う
+
 ## Done
 
 ## メモ
