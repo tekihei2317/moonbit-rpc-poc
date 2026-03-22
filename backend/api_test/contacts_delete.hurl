@@ -16,9 +16,9 @@ HTTP 204
 
 
 DELETE {{host}}/api/contacts/not-a-number
-HTTP 500
+HTTP 404
 [Asserts]
-body == "invalid syntax"
+body == "Not Found"
 
 
 DELETE {{host}}/api/contacts/999

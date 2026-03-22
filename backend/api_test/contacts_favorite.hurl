@@ -26,6 +26,6 @@ POST {{host}}/api/contacts/not-a-number/favorite
 Content-Type: application/json
 
 {}
-HTTP 500
+HTTP 404
 [Asserts]
-body == "invalid syntax"
+body == "Not Found"

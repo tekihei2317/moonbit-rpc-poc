@@ -1,178 +1,165 @@
 ///|
 /// Entry point. Parses CLI args, opens the SQLite database, registers
-/// REST API routes and static file handlers, then starts the Mocket server.
-fn main raise {
-  guard @argparse.parse(
-      Command("contacts", about="Contact Manager backend", options=[
-        OptionArg("port", short='p', long="port", about="Port to listen on", default_values=[
-          "4000",
-        ]),
+/// REST API routes, then starts the Mars server.
+async fn main {
+  let matches = @argparse.parse(
+    Command("contacts", about="Contact Manager backend", options=[
+      OptionArg("port", short='p', long="port", about="Port to listen on", default_values=[
+        "4000",
       ]),
-    )
-    is { values: { "port": [port], .. }, .. } else {
+    ]),
+  ) catch {
+    _ => {
+      println("Failed to parse arguments")
+      return
+    }
+  }
+  guard matches is { values: { "port": [port_str], .. }, .. } else {
     println("Failed to parse arguments")
     return
   }
-  let port = @strconv.parse_int(port)
+  let port = @strconv.parse_int(port_str) catch {
+    _ => {
+      println("Failed to parse port")
+      return
+    }
+  }
 
-  let conn = @sqlite3.Connection::open("contacts.db")
+  let conn = @sqlite3.Connection::open("contacts.db") catch {
+    err => {
+      println("Failed to open database: \{err}")
+      return
+    }
+  }
   println("Database opened: contacts.db")
 
-  init_db(conn)
+  init_db(conn) catch {
+    err => {
+      println("Failed to initialize database: \{err}")
+      return
+    }
+  }
   println("Database initialized")
 
-  let app = @mocket.new()
+  let app = @mars.Server::new()
+  app.middleware(@middleware.cors_allow_all())
   app
-  ..use_middleware(@cors.handle_cors())
-  ..get("/", _ => {
-    println("GET /")
-    let html =
-      #|<!DOCTYPE html>
-      #|<html>
-      #|<head>
-      #|  <meta charset="UTF-8">
-      #|  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      #|  <title>Contacts</title>
-      #|  <style>
-      #|    * { margin: 0; padding: 0; box-sizing: border-box; }
-      #|    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); background-attachment: fixed; min-height: 100vh; color: #333; }
-      #|  </style>
-      #|</head>
-      #|<body>
-      #|  <div id="app"></div>
-      #|  <script src="/frontend.js"></script>
-      #|</body>
-      #|</html>
-    @mocket.HttpResponse::new(
-      OK,
-      headers={ "Content-Type": "text/html; charset=utf-8" },
-      raw_body=@utf8.encode(html),
-    )
-  })
-  ..get("/frontend.js", _ => {
-    println("GET /frontend.js")
-    try {
-      let bytes = @fs.read_file_to_bytes("./public/frontend.js")
-      @mocket.HttpResponse::new(
-        OK,
-        headers={ "Content-Type": "application/javascript; charset=utf-8" },
-        raw_body=bytes,
-      )
-    } catch {
-      _ => {
-        println("  -> 404 Not Found")
-        @mocket.HttpResponse::new(NotFound).body("Not Found")
-      }
-    }
-  })
-  ..get(@shared.api_contacts, _ => {
-    println("GET \{@shared.api_contacts}")
-    try {
+  ..get(
+    @shared.api_contacts,
+    @mars.handler(async fn(ctx) -> Unit {
+      println("GET \{@shared.api_contacts}")
       let contacts = get_all_contacts(conn)
       println("  -> 200 (\{contacts.length()} contacts)")
-      @mocket.HttpResponse::new(OK, headers={
-        "Content-Type": "application/json; charset=utf-8",
-      }).json(contacts)
-    } catch {
-      e => {
-        println("  -> 500 \{e}")
-        @mocket.HttpResponse::new(InternalServerError).body("\{e}")
+      ctx.set_header("Content-Type", "application/json; charset=utf-8")
+      ctx.json(contacts.to_json())
+    }),
+  )
+  ..post(
+    @shared.api_contacts,
+    @mars.handler(async fn(ctx) -> Unit {
+      println("POST \{@shared.api_contacts}")
+      guard ctx.body_json() is Some(json) else {
+        println("  -> 400 Missing name")
+        ctx.text("Missing name field", status=400)
+        return
       }
-    }
-  })
-  ..post(@shared.api_contacts, event => {
-    println("POST \{@shared.api_contacts}")
-    try {
-      let json : Json = event.req.body()
       let name = match json {
-        { "name": String(n), .. } => n
+        { "name": String(name), .. } => name
         _ => {
           println("  -> 400 Missing name")
-          return @mocket.HttpResponse::new(BadRequest).body(
-            "Missing name field",
-          )
+          ctx.text("Missing name field", status=400)
+          return
         }
       }
       let email = match json {
-        { "email": String(e), .. } => e
+        { "email": String(email), .. } => email
         _ => {
           println("  -> 400 Missing email")
-          return @mocket.HttpResponse::new(BadRequest).body(
-            "Missing email field",
-          )
+          ctx.text("Missing email field", status=400)
+          return
         }
       }
       let phone = match json {
-        { "phone": String(p), .. } => p
+        { "phone": String(phone), .. } => phone
         _ => {
           println("  -> 400 Missing phone")
-          return @mocket.HttpResponse::new(BadRequest).body(
-            "Missing phone field",
-          )
+          ctx.text("Missing phone field", status=400)
+          return
         }
       }
       if !@shared.validate_name(name) {
         println("  -> 400 Invalid name")
-        return @mocket.HttpResponse::new(BadRequest).body(
+        ctx.text(
           "Name must be 1-\{@shared.max_name_length} characters",
+          status=400,
         )
+        return
       }
       if !@shared.validate_email(email) {
         println("  -> 400 Invalid email")
-        return @mocket.HttpResponse::new(BadRequest).body(
-          "Email must be valid (contain @ and . after @)",
-        )
+        ctx.text("Email must be valid (contain @ and . after @)", status=400)
+        return
       }
       if !@shared.validate_phone(phone) {
         println("  -> 400 Invalid phone")
-        return @mocket.HttpResponse::new(BadRequest).body(
+        ctx.text(
           "Phone must contain only digits, spaces, hyphens, parens, and +",
+          status=400,
         )
+        return
       }
       let contact = create_contact(conn, name, email, phone)
       println("  -> 201 created contact: \{name}")
-      @mocket.HttpResponse::new(Created, headers={
-        "Content-Type": "application/json; charset=utf-8",
-      }).json(contact)
-    } catch {
-      e => {
-        println("  -> 500 \{e}")
-        @mocket.HttpResponse::new(InternalServerError).body("\{e}")
+      ctx.set_header("Content-Type", "application/json; charset=utf-8")
+      ctx.json(contact.to_json(), status=201)
+    }),
+  )
+  ..post(
+    "\{@shared.api_contacts}/:id/favorite",
+    @mars.handler(async fn(ctx) -> Unit {
+      guard ctx.param("id") is Some(id_str) else {
+        println("  -> 400 Missing id")
+        ctx.text("Missing id field", status=400)
+        return
       }
-    }
-  })
-  ..post("\{@shared.api_contacts}/:id/favorite", event => {
-    let id_str = event.params.get("id").unwrap().to_string()
-    println("POST /api/contacts/\{id_str}/favorite")
-    try {
-      let id = @strconv.parse_int(id_str)
+      println("POST /api/contacts/\{id_str}/favorite")
+      let id = @strconv.parse_int(id_str) catch {
+        _ => {
+          println("  -> 404 Not Found")
+          ctx.text("Not Found", status=404)
+          return
+        }
+      }
       let contact = toggle_favorite(conn, id)
       println("  -> 200 toggled favorite for contact \{id}")
-      @mocket.HttpResponse::new(OK, headers={
-        "Content-Type": "application/json; charset=utf-8",
-      }).json(contact)
-    } catch {
-      e => {
-        println("  -> 500 \{e}")
-        @mocket.HttpResponse::new(InternalServerError).body("\{e}")
+      ctx.set_header("Content-Type", "application/json; charset=utf-8")
+      ctx.json(contact.to_json())
+    }),
+  )
+  .delete(
+    "\{@shared.api_contacts}/:id",
+    @mars.handler(async fn(ctx) -> Unit {
+      guard ctx.param("id") is Some(id_str) else {
+        println("  -> 400 Missing id")
+        ctx.text("Missing id field", status=400)
+        return
       }
-    }
-  })
-  .delete("\{@shared.api_contacts}/:id", fn(event) noraise {
-    let id_str = event.params.get("id").unwrap().to_string()
-    println("DELETE /api/contacts/\{id_str}")
-    try {
-      let id = @strconv.parse_int(id_str)
+      println("DELETE /api/contacts/\{id_str}")
+      let id = @strconv.parse_int(id_str) catch {
+        _ => {
+          println("  -> 404 Not Found")
+          ctx.text("Not Found", status=404)
+          return
+        }
+      }
       delete_contact(conn, id)
       println("  -> 204 deleted contact \{id}")
-      @mocket.HttpResponse::new(NoContent)
-    } catch {
-      e => {
-        println("  -> 500 \{e}")
-        @mocket.HttpResponse::new(InternalServerError).body("\{e}")
-      }
-    }
-  })
+      ctx.text("", status=204)
+    }),
+  )
+
   println("Server running at http://localhost:\{port}")
-  app.serve(port~)
+  app.serve(host="127.0.0.1", port~) catch {
+    err => println("Server failed: \{err}")
+  }
 }
