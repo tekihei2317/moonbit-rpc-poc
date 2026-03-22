@@ -1,0 +1,7 @@
+pre-commit:
+  jobs:
+    - name: moon check
+      run: moon check --target all
+    - name: moon fmt
+      run: moon fmt
+      stage_fixed: true
