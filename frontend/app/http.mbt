@@ -12,6 +12,7 @@ fn fetch_contacts(dispatch : @rabbita.Dispatch[Msg]) -> @rabbita.Cmd {
 }
 
 ///|
+/// Create a contact via POST /api/contacts.
 fn add_contact(dispatch : @rabbita.Dispatch[Msg], body : Json) -> @rabbita.Cmd {
   @http.post(
     @shared.api_contacts,
@@ -25,6 +26,7 @@ fn add_contact(dispatch : @rabbita.Dispatch[Msg], body : Json) -> @rabbita.Cmd {
 }
 
 ///|
+/// Toggle a contact favorite via POST /api/contacts/:id/favorite.
 fn toggle_favorite(dispatch : @rabbita.Dispatch[Msg], id : Int) -> @rabbita.Cmd {
   @http.post(
     @shared.api_contact_favorite(id),
@@ -38,6 +40,8 @@ fn toggle_favorite(dispatch : @rabbita.Dispatch[Msg], id : Int) -> @rabbita.Cmd 
 }
 
 ///|
+/// Delete a contact via DELETE /api/contacts/:id.
+#warnings("-unresolved_type_variable")
 fn delete_contact(dispatch : @rabbita.Dispatch[Msg], id : Int) -> @rabbita.Cmd {
   @http.delete(
     @shared.api_contact(id),

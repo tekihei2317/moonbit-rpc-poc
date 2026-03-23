@@ -87,7 +87,7 @@ pub fn Model::update(
     ContactAdded(Err(_)) => (self, @rabbita.none)
     ToggleFavorite(id) => (self, toggle_favorite(dispatch, id))
     FavoriteToggled(Ok(updated)) => {
-      let contacts = self.contacts.map(fn(c) {
+      let contacts = self.contacts.map(c => {
         if c.id == updated.id {
           updated
         } else {
@@ -99,7 +99,7 @@ pub fn Model::update(
     FavoriteToggled(Err(_)) => (self, @rabbita.none)
     DeleteContact(id) => (self, delete_contact(dispatch, id))
     ContactDeleted(Ok(id)) => {
-      let contacts = self.contacts.filter(fn(c) { c.id != id })
+      let contacts = self.contacts.filter(c => c.id != id)
       ({ ..self, contacts, }, @rabbita.none)
     }
     ContactDeleted(Err(_)) => (self, @rabbita.none)
@@ -111,68 +111,72 @@ pub fn Model::view(
   self : Model,
   dispatch : @rabbita.Dispatch[Msg],
 ) -> @rabbita.Html {
-  let sorted = @shared.sort_contacts(self.contacts)
-  let filtered = @shared.filter_contacts(sorted, self.search_query)
-  let favorites = filtered.filter(fn(c) { c.favorite })
-  let non_favorites = filtered.filter(fn(c) { !c.favorite })
-
-  let sections : Array[@rabbita.Html] = []
-
-  sections.push(
+  fn view_header_section() -> @rabbita.Html {
     @html.div(style=header_style, [
       @html.h1(style=header_title_style, "Contacts"),
       @html.p(style=header_subtitle_style, "Your address book"),
-    ]),
-  )
+    ])
+  }
 
-  sections.push(
+  fn view_search_section(
+    search_query : String,
+    dispatch : @rabbita.Dispatch[Msg],
+  ) -> @rabbita.Html {
     @html.div(style=search_wrapper_style, [
       @html.input(
         input_type=Text,
         placeholder="Search contacts...",
-        value=self.search_query,
-        on_input=fn(v) { dispatch(SearchChanged(v)) },
+        value=search_query,
+        on_input=v => dispatch(SearchChanged(v)),
         style=search_input_style,
         "",
       ),
-    ]),
-  )
-
-  let contact_count = self.contacts.length()
-  let count_suffix = if contact_count != 1 { "s" } else { "" }
-  let form_section = if self.show_form {
-    @html.form(on_submit=dispatch(AddContact), style=form_style, [
-      @html.input(
-        input_type=Text,
-        placeholder="Name",
-        value=self.name_input,
-        on_input=fn(v) { dispatch(NameInputChanged(v)) },
-        style=input_style,
-        "",
-      ),
-      @html.input(
-        input_type=Text,
-        placeholder="Email",
-        value=self.email_input,
-        on_input=fn(v) { dispatch(EmailInputChanged(v)) },
-        style=input_style,
-        "",
-      ),
-      @html.input(
-        input_type=Text,
-        placeholder="Phone",
-        value=self.phone_input,
-        on_input=fn(v) { dispatch(PhoneInputChanged(v)) },
-        style=input_style,
-        "",
-      ),
-      @html.button(type_="submit", style=submit_btn_style, "Save Contact"),
     ])
-  } else {
-    @html.div(style=[], "")
   }
 
-  sections.push(
+  fn view_add_contact_form(
+    self : Model,
+    dispatch : @rabbita.Dispatch[Msg],
+  ) -> @rabbita.Html {
+    if self.show_form {
+      @html.form(on_submit=dispatch(AddContact), style=form_style, [
+        @html.input(
+          input_type=Text,
+          placeholder="Name",
+          value=self.name_input,
+          on_input=v => dispatch(NameInputChanged(v)),
+          style=input_style,
+          "",
+        ),
+        @html.input(
+          input_type=Text,
+          placeholder="Email",
+          value=self.email_input,
+          on_input=v => dispatch(EmailInputChanged(v)),
+          style=input_style,
+          "",
+        ),
+        @html.input(
+          input_type=Text,
+          placeholder="Phone",
+          value=self.phone_input,
+          on_input=v => dispatch(PhoneInputChanged(v)),
+          style=input_style,
+          "",
+        ),
+        @html.button(type_="submit", style=submit_btn_style, "Save Contact"),
+      ])
+    } else {
+      @html.div(style=[], "")
+    }
+  }
+
+  fn view_toolbar_section(
+    self : Model,
+    dispatch : @rabbita.Dispatch[Msg],
+  ) -> @rabbita.Html {
+    let contact_count = self.contacts.length()
+    let count_suffix = if contact_count != 1 { "s" } else { "" }
     view_card("", [
       @html.div(style=toolbar_style, [
         @html.span(
@@ -189,48 +193,86 @@ pub fn Model::view(
           },
         ),
       ]),
-      form_section,
-    ]),
-  )
-
-  if !favorites.is_empty() {
-    sections.push(
-      view_card(
-        "Favorites",
-        favorites.map(fn(c) { view_contact_row(dispatch, c) }),
-      ),
-    )
+      view_add_contact_form(self, dispatch),
+    ])
   }
 
-  if !non_favorites.is_empty() {
-    sections.push(
-      view_card(
-        if !favorites.is_empty() {
-          "Other Contacts"
-        } else {
-          "All Contacts"
-        },
-        non_favorites.map(fn(c) { view_contact_row(dispatch, c) }),
-      ),
-    )
-  } else if favorites.is_empty() &&
-    !self.contacts.is_empty() &&
-    !self.search_query.is_empty() {
-    sections.push(
-      view_card("Contacts", [
-        @html.p(style=empty_msg_style, "No contacts match your search"),
-      ]),
-    )
-  } else if self.contacts.is_empty() {
-    sections.push(
-      view_card("Contacts", [
-        @html.p(
-          style=empty_msg_style,
-          "No contacts yet. Add your first contact!",
+  fn view_favorites_sections(
+    favorites : Array[@shared.Contact],
+    dispatch : @rabbita.Dispatch[Msg],
+  ) -> @rabbita.Html? {
+    if favorites.is_empty() {
+      None
+    } else {
+      Some(
+        view_card(
+          "Favorites",
+          favorites.map(c => view_contact_row(dispatch, c)),
         ),
-      ]),
-    )
+      )
+    }
   }
 
-  @html.div(style=container_style, sections)
+  fn view_contacts_sections(
+    self : Model,
+    favorites : Array[@shared.Contact],
+    non_favorites : Array[@shared.Contact],
+    dispatch : @rabbita.Dispatch[Msg],
+  ) -> @rabbita.Html? {
+    let has_favorites = !favorites.is_empty()
+    let has_non_favorites = !non_favorites.is_empty()
+    let show_empty_search_message = !has_favorites &&
+      !has_non_favorites &&
+      !self.contacts.is_empty() &&
+      !self.search_query.is_empty()
+    let show_empty_contacts_message = self.contacts.is_empty()
+
+    if has_non_favorites {
+      Some(
+        view_card(
+          if has_favorites {
+            "Other Contacts"
+          } else {
+            "All Contacts"
+          },
+          non_favorites.map(c => view_contact_row(dispatch, c)),
+        ),
+      )
+    } else if show_empty_search_message {
+      Some(
+        view_card("Contacts", [
+          @html.p(style=empty_msg_style, "No contacts match your search"),
+        ]),
+      )
+    } else if show_empty_contacts_message {
+      Some(
+        view_card("Contacts", [
+          @html.p(
+            style=empty_msg_style,
+            "No contacts yet. Add your first contact!",
+          ),
+        ]),
+      )
+    } else {
+      None
+    }
+  }
+
+  let filtered = @shared.filter_contacts(
+    @shared.sort_contacts(self.contacts),
+    self.search_query,
+  )
+  let favorites = filtered.filter(c => c.favorite)
+  let non_favorites = filtered.filter(c => !c.favorite)
+
+  @html.div(
+    style=container_style,
+    [
+      view_header_section(),
+      view_search_section(self.search_query, dispatch),
+      view_toolbar_section(self, dispatch),
+      ..view_favorites_sections(favorites, dispatch).iter(),
+      ..view_contacts_sections(self, favorites, non_favorites, dispatch).iter(),
+    ],
+  )
 }
