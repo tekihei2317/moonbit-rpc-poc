@@ -63,10 +63,10 @@ pub fn Model::update(
       if !@shared.validate_phone(self.phone_input) {
         return (self, @rabbita.none)
       }
-      let body : Json = {
-        "name": self.name_input,
-        "email": self.email_input,
-        "phone": self.phone_input,
+      let input : @shared.CreateContactInput = {
+        name: self.name_input,
+        email: self.email_input,
+        phone: self.phone_input,
       }
       (
         {
@@ -76,7 +76,7 @@ pub fn Model::update(
           phone_input: "",
           show_form: false,
         },
-        add_contact(dispatch, body),
+        add_contact(dispatch, input),
       )
     }
     ContactAdded(Ok(contact)) => {

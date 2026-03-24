@@ -1,0 +1,10 @@
+import {
+  "tekihei2317/moonbit-rpc-poc/rpc" @rpc_core,
+  "moonbit-community/rabbita",
+  "moonbit-community/rabbita/http",
+  "moonbitlang/core/json",
+}
+
+options(
+  "supported-targets": "js",
+)

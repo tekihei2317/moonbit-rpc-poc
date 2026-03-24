@@ -1,15 +1,31 @@
 ///|
-/// Base API path for the contacts collection endpoint.
-pub let api_contacts : String = "/api/contacts"
+pub(all) struct CreateContactInput {
+  name : String
+  email : String
+  phone : String
+} derive(ToJson, FromJson)
 
 ///|
-/// Build the API path for a single contact by id.
-pub fn api_contact(id : Int) -> String {
-  "/api/contacts/\{id}"
-}
+pub(all) struct ContactIdInput {
+  id : Int
+} derive(ToJson, FromJson)
 
 ///|
-/// Build the API path for toggling a contact's favorite status by id.
-pub fn api_contact_favorite(id : Int) -> String {
-  "/api/contacts/\{id}/favorite"
-}
+pub let list_contacts : @rpc.Route[Unit, Array[Contact]] = @rpc.query(
+  "contacts.list",
+)
+
+///|
+pub let create_contact : @rpc.Route[CreateContactInput, Contact] = @rpc.mutation(
+  "contacts.create",
+)
+
+///|
+pub let toggle_contact_favorite : @rpc.Route[ContactIdInput, Contact] = @rpc.mutation(
+  "contacts.toggle_favorite",
+)
+
+///|
+pub let delete_contact : @rpc.Route[ContactIdInput, Unit] = @rpc.mutation(
+  "contacts.delete",
+)

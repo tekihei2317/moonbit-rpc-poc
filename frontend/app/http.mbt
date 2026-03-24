@@ -1,52 +1,32 @@
 ///|
-/// Fetch all contacts from the backend via GET /api/contacts.
+/// Fetch all contacts via RPC.
 fn fetch_contacts(dispatch : @rabbita.Dispatch[Msg]) -> @rabbita.Cmd {
-  @http.get(
-    @shared.api_contacts,
-    expect=Json(result => dispatch(GotContacts(result)), json => {
-      Ok(@json.from_json(json)) catch {
-        _ => Err("Failed to decode contacts")
-      }
-    }),
-  )
+  @rpc.call(@shared.list_contacts, (), result => dispatch(GotContacts(result)))
 }
 
 ///|
-/// Create a contact via POST /api/contacts.
-fn add_contact(dispatch : @rabbita.Dispatch[Msg], body : Json) -> @rabbita.Cmd {
-  @http.post(
-    @shared.api_contacts,
-    Json(body),
-    expect=Json(result => dispatch(ContactAdded(result)), json => {
-      Ok(@json.from_json(json)) catch {
-        _ => Err("Failed to decode contact")
-      }
-    }),
-  )
+/// Create a contact via RPC.
+fn add_contact(
+  dispatch : @rabbita.Dispatch[Msg],
+  input : @shared.CreateContactInput,
+) -> @rabbita.Cmd {
+  @rpc.call(@shared.create_contact, input, result => {
+    dispatch(ContactAdded(result))
+  })
 }
 
 ///|
-/// Toggle a contact favorite via POST /api/contacts/:id/favorite.
+/// Toggle a contact favorite via RPC.
 fn toggle_favorite(dispatch : @rabbita.Dispatch[Msg], id : Int) -> @rabbita.Cmd {
-  @http.post(
-    @shared.api_contact_favorite(id),
-    Json({}),
-    expect=Json(result => dispatch(FavoriteToggled(result)), json => {
-      Ok(@json.from_json(json)) catch {
-        _ => Err("Failed to decode contact")
-      }
-    }),
-  )
+  @rpc.call(@shared.toggle_contact_favorite, { id, }, result => {
+    dispatch(FavoriteToggled(result))
+  })
 }
 
 ///|
-/// Delete a contact via DELETE /api/contacts/:id.
-#warnings("-unresolved_type_variable")
+/// Delete a contact via RPC.
 fn delete_contact(dispatch : @rabbita.Dispatch[Msg], id : Int) -> @rabbita.Cmd {
-  @http.delete(
-    @shared.api_contact(id),
-    expect=Text(result => {
-      dispatch(ContactDeleted(result |> Result::map(_ => id)))
-    }),
-  )
+  @rpc.call(@shared.delete_contact, { id, }, result => {
+    dispatch(ContactDeleted(result |> Result::map(_ => id)))
+  })
 }

@@ -1,4 +1,4 @@
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -6,7 +6,7 @@ Content-Type: application/json
   "email": "alice@example.com",
   "phone": "090-1234-5678"
 }
-HTTP 201
+HTTP 200
 [Asserts]
 header "Content-Type" == "application/json; charset=utf-8"
 jsonpath "$.id" == 1
@@ -15,8 +15,7 @@ jsonpath "$.email" == "alice@example.com"
 jsonpath "$.phone" == "090-1234-5678"
 jsonpath "$.favorite" == false
 
-
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -25,10 +24,10 @@ Content-Type: application/json
 }
 HTTP 400
 [Asserts]
-body == "Missing name field"
+body == "Invalid input"
 
 
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -37,10 +36,10 @@ Content-Type: application/json
 }
 HTTP 400
 [Asserts]
-body == "Missing email field"
+body == "Invalid input"
 
 
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -49,10 +48,10 @@ Content-Type: application/json
 }
 HTTP 400
 [Asserts]
-body == "Missing phone field"
+body == "Invalid input"
 
 
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -65,7 +64,7 @@ HTTP 400
 body == "Name must be 1-50 characters"
 
 
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -78,7 +77,7 @@ HTTP 400
 body == "Email must be valid (contain @ and . after @)"
 
 
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {

@@ -1,4 +1,4 @@
-POST {{host}}/api/contacts
+POST {{host}}/api/rpc/contacts.create
 Content-Type: application/json
 
 {
@@ -6,20 +6,40 @@ Content-Type: application/json
   "email": "alice@example.com",
   "phone": "090-1234-5678"
 }
-HTTP 201
+HTTP 200
 [Captures]
 contact_id: jsonpath "$.id"
 
 
-DELETE {{host}}/api/contacts/{{contact_id}}
-HTTP 204
+POST {{host}}/api/rpc/contacts.delete
+Content-Type: application/json
 
-
-DELETE {{host}}/api/contacts/not-a-number
-HTTP 404
+{
+  "id": {{contact_id}}
+}
+HTTP 200
 [Asserts]
-body == "Not Found"
+header "Content-Type" == "application/json; charset=utf-8"
+body == "null"
 
 
-DELETE {{host}}/api/contacts/999
-HTTP 204
+POST {{host}}/api/rpc/contacts.delete
+Content-Type: application/json
+
+{
+  "id": "not-a-number"
+}
+HTTP 400
+[Asserts]
+body == "Invalid input"
+
+
+POST {{host}}/api/rpc/contacts.delete
+Content-Type: application/json
+
+{
+  "id": 999
+}
+HTTP 200
+[Asserts]
+body == "null"

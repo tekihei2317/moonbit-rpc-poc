@@ -1,4 +1,3 @@
 import {
   "moonbitlang/core/json",
-  "tekihei2317/moonbit-rpc-poc/rpc",
 }

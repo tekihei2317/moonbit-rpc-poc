@@ -1,5 +1,4 @@
 import {
-  "tekihei2317/moonbit-rpc-poc/shared",
   "mizchi/mars",
   "mizchi/mars/middleware",
   "myfreess/sqlite3",
@@ -7,6 +6,9 @@ import {
   "moonbitlang/core/argparse",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
+  "tekihei2317/moonbit-rpc-poc/shared",
+  "tekihei2317/moonbit-rpc-poc/rpc" @rpc_core,
+  "tekihei2317/moonbit-rpc-poc/rpc/server" @rpc,
 }
 
 options(

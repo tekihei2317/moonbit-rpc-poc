@@ -26,7 +26,7 @@ run_test_file() {
   moon run backend --target native -- --port "$PORT" &
   SERVER_PID=$!
 
-  until curl -s -o /dev/null "$HOST/api/contacts"; do
+  until curl -s -o /dev/null "$HOST/api/rpc/contacts.list"; do
     sleep 1
   done
 
