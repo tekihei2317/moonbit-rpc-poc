@@ -1,7 +1,7 @@
 import {
   "mizchi/mars",
   "mizchi/mars/middleware",
-  "myfreess/sqlite3",
+  "moonbit-community/sqlite3",
   "moonbitlang/async",
   "moonbitlang/core/argparse",
   "moonbitlang/core/json",
