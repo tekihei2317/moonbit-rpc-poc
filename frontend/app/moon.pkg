@@ -8,4 +8,6 @@ import {
 
 warnings = "+unnecessary_annotation"
 
-supported_targets = "js"
+options(
+  "supported-targets": "js",
+)

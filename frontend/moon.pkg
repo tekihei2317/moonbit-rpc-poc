@@ -3,8 +3,7 @@ import {
   "moonbit-community/rabbita",
 }
 
-supported_targets = "js"
-
 options(
   is_main: true,
+  "supported-targets": "js",
 )
