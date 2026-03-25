@@ -7,7 +7,7 @@ HOST="${HOST:-http://127.0.0.1:${PORT}}"
 SERVER_PID=""
 
 stop_existing_server() {
-  pkill -f "moon run backend --target native -- --port $PORT" 2>/dev/null || true
+  pkill -f "moon -C backend run \\. --target native -- --port $PORT" 2>/dev/null || true
 }
 
 stop_server() {
@@ -21,9 +21,9 @@ stop_server() {
 run_test_file() {
   local file="$1"
 
-  rm -f contacts.db
+  rm -f backend/contacts.db
 
-  moon run backend --target native -- --port "$PORT" &
+  moon -C backend run . --target native -- --port "$PORT" &
   SERVER_PID=$!
 
   until curl -s -o /dev/null "$HOST/api/rpc/contacts.list"; do
