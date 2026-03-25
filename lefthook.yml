@@ -1,9 +1,19 @@
 pre-commit:
   jobs:
-    - name: moon check
-      run: moon check --target all
-    - name: moon fmt
-      run: moon fmt
+    - name: moon check shared
+      run: moon -C shared check --target all
+    - name: moon check backend
+      run: moon -C backend check --target native
+    - name: moon check frontend
+      run: moon -C frontend check --target js
+    - name: moon fmt shared
+      run: moon -C shared fmt
+      stage_fixed: true
+    - name: moon fmt backend
+      run: moon -C backend fmt
+      stage_fixed: true
+    - name: moon fmt frontend
+      run: moon -C frontend fmt
       stage_fixed: true
     - name: hurlfmt
       run: bunx hurlfmt backend/api_test/*.hurl

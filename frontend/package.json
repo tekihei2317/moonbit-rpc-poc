@@ -1,0 +1,14 @@
+{
+  "name": "@moonbit-rpc-poc/frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "sh -c 'trap \"kill 0\" EXIT; moon build --target js --watch & vite'",
+    "dev:vite": "vite",
+    "dev:moonbit": "moon build --target js --watch"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "vite-plugin-moonbit": "^0.1.5"
+  }
+}

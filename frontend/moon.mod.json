@@ -1,0 +1,10 @@
+{
+  "name": "moonbit-rpc-poc/frontend",
+  "deps": {
+    "moonbit-community/rabbita": "0.11.5",
+    "moonbit-rpc-poc/shared": {
+      "path": "../shared"
+    }
+  },
+  "preferred-target": "js"
+}

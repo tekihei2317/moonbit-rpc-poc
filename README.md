@@ -14,13 +14,18 @@
 ## 実行方法
 
 ```bash
-npm install
+bun install
+moon -C shared update
+moon -C backend update
+moon -C frontend update
 make backend-dev
 ```
 
 ```bash
 make frontend-dev
 ```
+
+フロントエンドの依存は `frontend/package.json` で管理しています。
 
 - フロントエンド: http://localhost:5173
 - API: http://localhost:4000
@@ -64,6 +69,6 @@ pub let create_contact : @rpc.Route[CreateContactInput, Contact] = @rpc.mutation
 
 clientとserverはtargetが違うのでpackageを分けています。
 
-- `rpc`: 共通の route / error 型
-- `rpc/client`: `@rpc.call`
-- `rpc/server`: `@rpc.handle`
+- `shared`: 共通の route / error 型とドメイン型
+- `frontend/rpc`: `@rpc.call`
+- `backend/rpc`: `@rpc.handle`

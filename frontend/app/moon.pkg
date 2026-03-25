@@ -1,8 +1,8 @@
 import {
-  "tekihei2317/moonbit-rpc-poc/shared",
-  "tekihei2317/moonbit-rpc-poc/rpc/client" @rpc,
   "moonbit-community/rabbita",
   "moonbit-community/rabbita/html",
+  "moonbit-rpc-poc/shared",
+  "moonbit-rpc-poc/frontend/rpc",
 }
 
 warnings = "+unnecessary_annotation"

@@ -11,21 +11,19 @@ pub(all) struct ContactIdInput {
 } derive(ToJson, FromJson)
 
 ///|
-pub let list_contacts : @rpc.Route[Unit, Array[Contact]] = @rpc.query(
-  "contacts.list",
-)
+pub let list_contacts : Route[Unit, Array[Contact]] = query("contacts.list")
 
 ///|
-pub let create_contact : @rpc.Route[CreateContactInput, Contact] = @rpc.mutation(
+pub let create_contact : Route[CreateContactInput, Contact] = mutation(
   "contacts.create",
 )
 
 ///|
-pub let toggle_contact_favorite : @rpc.Route[ContactIdInput, Contact] = @rpc.mutation(
+pub let toggle_contact_favorite : Route[ContactIdInput, Contact] = mutation(
   "contacts.toggle_favorite",
 )
 
 ///|
-pub let delete_contact : @rpc.Route[ContactIdInput, Unit] = @rpc.mutation(
+pub let delete_contact : Route[ContactIdInput, Unit] = mutation(
   "contacts.delete",
 )

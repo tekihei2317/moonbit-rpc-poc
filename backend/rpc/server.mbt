@@ -1,16 +1,16 @@
 ///|
 fn[Input : FromJson] parse_query_input(
   ctx : @mars.Context,
-) -> Result[Input, @rpc_core.RpcError] {
+) -> Result[Input, @shared.RpcError] {
   let json = match ctx.query("input") {
     Some(input) =>
       @json.parse(input) catch {
-        _ => return Err(@rpc_core.RpcError::bad_request("Invalid input"))
+        _ => return Err(@shared.RpcError::bad_request("Invalid input"))
       }
     None => Json::null()
   }
   let value : Input = @json.from_json(json) catch {
-    _ => return Err(@rpc_core.RpcError::bad_request("Invalid input"))
+    _ => return Err(@shared.RpcError::bad_request("Invalid input"))
   }
   Ok(value)
 }
@@ -18,13 +18,13 @@ fn[Input : FromJson] parse_query_input(
 ///|
 async fn[Input : FromJson] parse_body_input(
   ctx : @mars.Context,
-) -> Result[Input, @rpc_core.RpcError] raise Error {
+) -> Result[Input, @shared.RpcError] raise Error {
   let json = match ctx.body_json() {
     Some(json) => json
     None => Json::null()
   }
   let value : Input = @json.from_json(json) catch {
-    _ => return Err(@rpc_core.RpcError::bad_request("Invalid input"))
+    _ => return Err(@shared.RpcError::bad_request("Invalid input"))
   }
   Ok(value)
 }
@@ -32,7 +32,7 @@ async fn[Input : FromJson] parse_body_input(
 ///|
 async fn send_error(
   ctx : @mars.Context,
-  err : @rpc_core.RpcError,
+  err : @shared.RpcError,
 ) -> Unit raise Error {
   ctx.text(err.message, status=err.status)
 }
@@ -50,13 +50,13 @@ async fn[Output : ToJson] send_output(
 /// Register a Mars handler for an RPC route.
 pub fn[Input : FromJson, Output : ToJson] handle(
   app : @mars.Server,
-  route : @rpc_core.Route[Input, Output],
-  handler : (Input) -> Result[Output, @rpc_core.RpcError],
+  route : @shared.Route[Input, Output],
+  handler : (Input) -> Result[Output, @shared.RpcError],
 ) -> Unit {
   match route.operation {
     Query =>
       app.get(
-        @rpc_core.path(route),
+        @shared.path(route),
         @mars.handler(async fn(ctx) raise Error {
           let input = match parse_query_input(ctx) {
             Ok(input) => input
@@ -77,7 +77,7 @@ pub fn[Input : FromJson, Output : ToJson] handle(
       )
     Mutation =>
       app.post(
-        @rpc_core.path(route),
+        @shared.path(route),
         @mars.handler(async fn(ctx) raise Error {
           let input = match parse_body_input(ctx) {
             Ok(input) => input

@@ -1,5 +1,5 @@
 import {
-  "tekihei2317/moonbit-rpc-poc/rpc" @rpc_core,
+  "moonbit-rpc-poc/shared" @shared,
   "mizchi/mars",
   "moonbitlang/core/json",
 }

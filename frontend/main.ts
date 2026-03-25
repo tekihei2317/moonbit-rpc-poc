@@ -1,1 +1,1 @@
-import "mbt:tekihei2317/moonbit-rpc-poc/frontend";
+import "mbt:moonbit-rpc-poc/frontend";

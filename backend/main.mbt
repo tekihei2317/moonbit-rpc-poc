@@ -46,7 +46,7 @@ async fn main {
 
   @rpc.handle(app, @shared.list_contacts, _ => {
     let contacts = get_all_contacts(conn) catch {
-      _ => return Err(@rpc_core.RpcError::internal())
+      _ => return Err(@shared.RpcError::internal())
     }
     Ok(contacts)
   })
@@ -54,41 +54,41 @@ async fn main {
   @rpc.handle(app, @shared.create_contact, input => {
     if !@shared.validate_name(input.name) {
       return Err(
-        @rpc_core.RpcError::bad_request(
+        @shared.RpcError::bad_request(
           "Name must be 1-\{@shared.max_name_length} characters",
         ),
       )
     }
     if !@shared.validate_email(input.email) {
       return Err(
-        @rpc_core.RpcError::bad_request(
+        @shared.RpcError::bad_request(
           "Email must be valid (contain @ and . after @)",
         ),
       )
     }
     if !@shared.validate_phone(input.phone) {
       return Err(
-        @rpc_core.RpcError::bad_request(
+        @shared.RpcError::bad_request(
           "Phone must contain only digits, spaces, hyphens, parens, and +",
         ),
       )
     }
     let contact = create_contact(conn, input.name, input.email, input.phone) catch {
-      _ => return Err(@rpc_core.RpcError::internal())
+      _ => return Err(@shared.RpcError::internal())
     }
     Ok(contact)
   })
 
   @rpc.handle(app, @shared.toggle_contact_favorite, input => {
     let contact = toggle_favorite(conn, input.id) catch {
-      _ => return Err(@rpc_core.RpcError::internal())
+      _ => return Err(@shared.RpcError::internal())
     }
     Ok(contact)
   })
 
   @rpc.handle(app, @shared.delete_contact, input => {
     delete_contact(conn, input.id) catch {
-      _ => return Err(@rpc_core.RpcError::internal())
+      _ => return Err(@shared.RpcError::internal())
     }
     Ok(())
   })

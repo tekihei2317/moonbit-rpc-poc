@@ -1,16 +1,16 @@
 {
-  "name": "@moonbit-rpc-poc/web",
+  "name": "@moonbit-rpc-poc/tools",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
-    "dev": "vite",
     "prepare": "lefthook install"
   },
   "devDependencies": {
     "@orangeopensource/hurl": "^7.1.7",
-    "lefthook": "^1.11.13",
-    "vite": "^7.3.1",
-    "vite-plugin-moonbit": "^0.1.5"
+    "lefthook": "^1.11.13"
   },
   "trustedDependencies": [
     "@orangeopensource/hurl"

@@ -1,0 +1,13 @@
+{
+  "name": "moonbit-rpc-poc/backend",
+  "deps": {
+    "mizchi/mars": "0.3.10",
+    "moonbit-community/sqlite3": "0.1.3",
+    "moonbitlang/async": "0.16.6",
+    "moonbitlang/x": "0.4.40",
+    "moonbit-rpc-poc/shared": {
+      "path": "../shared"
+    }
+  },
+  "preferred-target": "native"
+}

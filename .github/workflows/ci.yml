@@ -23,20 +23,38 @@ jobs:
       - name: Install web dependencies
         run: bun install
 
-      - name: Moon update
-        run: moon update
+      - name: Moon update shared
+        run: moon -C shared update
 
-      - name: Check formatting
-        run: moon fmt --check
+      - name: Moon update backend
+        run: moon -C backend update
 
-      - name: Check all targets
-        run: moon check --target all
+      - name: Moon update frontend
+        run: moon -C frontend update
+
+      - name: Check shared formatting
+        run: moon -C shared fmt --check
+
+      - name: Check backend formatting
+        run: moon -C backend fmt --check
+
+      - name: Check frontend formatting
+        run: moon -C frontend fmt --check
+
+      - name: Check shared
+        run: moon -C shared check --target all
+
+      - name: Check backend
+        run: moon -C backend check --target native
+
+      - name: Check frontend
+        run: moon -C frontend check --target js
 
       - name: Run backend tests
-        run: moon test backend --target native
+        run: moon -C backend test . --target native
 
       - name: Run frontend tests
-        run: moon test frontend/app --target js
+        run: moon -C frontend test app --target js
 
       - name: Run backend API tests
         run: make test-api

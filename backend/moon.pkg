@@ -6,9 +6,8 @@ import {
   "moonbitlang/core/argparse",
   "moonbitlang/core/json",
   "moonbitlang/core/strconv",
-  "tekihei2317/moonbit-rpc-poc/shared",
-  "tekihei2317/moonbit-rpc-poc/rpc" @rpc_core,
-  "tekihei2317/moonbit-rpc-poc/rpc/server" @rpc,
+  "moonbit-rpc-poc/shared",
+  "moonbit-rpc-poc/backend/rpc",
 }
 
 options(
