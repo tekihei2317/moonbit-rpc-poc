@@ -15,17 +15,15 @@
 
 ```bash
 bun install
-moon -C shared update
-moon -C backend update
-moon -C frontend update
+```
+
+```bash
 make backend-dev
 ```
 
 ```bash
 make frontend-dev
 ```
-
-フロントエンドの依存は `frontend/package.json` で管理しています。
 
 - フロントエンド: http://localhost:5173
 - API: http://localhost:4000
@@ -34,7 +32,7 @@ make frontend-dev
 
 RPCの仕様は[docs/rpc.md](/Users/tekihei2317/ghq/github.com/tekihei2317/moonbit-rpc-poc/docs/rpc.md)にまとめています。
 
-共有パッケージに`route`を置き、frontendからは`@rpc.call`、backendからは`@rpc.handle` を使います。
+共有パッケージに`route`を置き、frontendからは`@rpc.call`、backendからは`@rpc.handle`を使います。
 
 ```mbt
 // shared/routes.mbt
@@ -66,9 +64,3 @@ pub let create_contact : @rpc.Route[CreateContactInput, Contact] = @rpc.mutation
   Ok(create_contact(conn, input.name, input.email, input.phone))
 })
 ```
-
-clientとserverはtargetが違うのでpackageを分けています。
-
-- `shared`: 共通の route / error 型とドメイン型
-- `frontend/rpc`: `@rpc.call`
-- `backend/rpc`: `@rpc.handle`

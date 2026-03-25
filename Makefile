@@ -4,7 +4,7 @@ PORT ?= 4000
 TEST_PORT ?= 4001
 
 frontend-dev:
-	bun --cwd frontend run dev
+	bun run --cwd frontend/ dev
 
 backend-dev:
 	moon -C backend run . --target native -- --port $(PORT)

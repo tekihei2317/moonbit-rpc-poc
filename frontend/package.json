@@ -3,9 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "sh -c 'trap \"kill 0\" EXIT; moon build --target js --watch & vite'",
-    "dev:vite": "vite",
-    "dev:moonbit": "moon build --target js --watch"
+    "dev": "vite"
   },
   "devDependencies": {
     "vite": "^7.3.1",
