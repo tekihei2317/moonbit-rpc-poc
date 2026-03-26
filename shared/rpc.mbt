@@ -3,29 +3,30 @@
 pub let base_path : String = "/api/rpc"
 
 ///|
-/// The HTTP operation used by a route.
-pub(all) enum Operation {
+/// The RPC route kind.
+pub enum Operation {
   Query
   Mutation
-} derive(Debug)
+}
 
 ///|
 /// Shared route description used by both client and server.
-pub(all) struct Route[Input, Output] {
+///
+/// TODO: Suppress `unused_type_variable` only for this phantom-typed struct
+/// once MoonBit supports declaration-local suppression for this warning.
+pub struct Route[Input, Output] {
   operation : Operation
   name : String
-  input_type : Input?
-  output_type : Output?
 }
 
 ///|
 pub fn[Input, Output] query(name : String) -> Route[Input, Output] {
-  { operation: Query, name, input_type: None, output_type: None }
+  { operation: Query, name }
 }
 
 ///|
 pub fn[Input, Output] mutation(name : String) -> Route[Input, Output] {
-  { operation: Mutation, name, input_type: None, output_type: None }
+  { operation: Mutation, name }
 }
 
 ///|
